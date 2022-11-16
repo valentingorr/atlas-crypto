@@ -1,1 +1,1 @@
-# crypto-atlas
+# Atlas Crypto
