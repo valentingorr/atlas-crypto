@@ -1,4 +1,19 @@
 {
+	"name": "atlas-crypto",
 	"main": "index.js",
-	"version": "1.0.0"
+	"version": "1.0.0",
+	"description": "json-atlas plugin to encrypt data",
+	"author": "Valentin Gorrin",
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/valentingorr/atlas-crypto.git"
+	},
+	"bugs": {
+		"url": "https://github.com/valentingorr/atlas-crypto/issues"
+	},
+	"keywords": [
+		"json", "json-atlas", "crypto", "atlas", "local database"
+	],
+	"homepage": "https://github.com/valentingorr/atlas-crypto#readme"
 }
