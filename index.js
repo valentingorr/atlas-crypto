@@ -25,7 +25,32 @@ module.exports = (p = {}) => {
     };
     
     return (db) => {
+
+        const unCryptTable = table => {
+            db.appendLog(`unCrypting -> ${table.name}`, ">");
+            const startTime = new Date().getTime();
+            const cKeys = Object.keys(table.schema.items).map(item => {
+                return table.schema.items[item].hasOwnProperty("crypto") ? {
+                    item, salt: table.schema.items[item].crypto
+                } : false;
+            }).filter(key => key !== false);
+            db.table(table.name).map(item => {
+                const uC = {};
+                cKeys.forEach(key => {
+                    const salt = parameters.salts[key.salt];
+                    if(!salt) return;
+                    uC[key.item] = decrypt(item[key.item], parseSalt(salt));
+                });
+                return {
+                    ...item,
+                    ...uC
+                }
+            });
+            db.appendLog(`unCrypted -> ${table.name} (${new Date().getTime() - startTime}ms)`, ">");
+        };
+
         return {
+            name: require("./package.json").name,
             proxy: (event, original, amended) => {
                 const dispatcher = JSON.parse(fs.readFileSync(db.dbParameters.path, "utf-8"));
                 const items = dispatcher.tables.find(table => table.name === event.table).schema.items;
@@ -53,6 +78,13 @@ module.exports = (p = {}) => {
                         break;
                 }
                 return amended;
+            },
+            init: () => {
+                db.customMethods["unCryptTable"] = (tableName) => unCryptTable(db.dispatcher.tables.find(t => t.name === tableName));
+                db.customTableMethods["unCrypt"] = table => unCryptTable(db.dispatcher.tables.find(t => t.name === table.tableName));
+            },
+            unuse: () => {
+                db.dispatcher.tables.forEach(table => unCryptTable(table));
             }
         }
     };
